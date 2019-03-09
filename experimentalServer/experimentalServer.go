@@ -7,16 +7,19 @@ import (
 	"log"
 	"net/http"
 	"time"
-
+	"io/ioutil"
 	"github.com/gorilla/mux"
 )
-
+const (
+	configJSON = "/home/ubuntu/go/src/dnsgrep/experimentalServer/config.json"
+)
 // a struct for the metadata contained in the JSON
 type MetaJSON struct {
 	Runtime   string // not the most efficent way to convey this...
 	Errors    []string
-	FileNames []string // list of filenames scanned
-	TOS       string
+	Message   string `json:"Message"` // custom message to send
+	FileNames []string `json:"FileNames"`// list of filenames scanned
+	TOS       string `json:"TOS"`
 }
 
 // a struct for the response json
@@ -25,7 +28,16 @@ type ResponseJSON struct {
 	FDNS_A []string
 	RDNS   []string
 }
-
+// load config
+func GetMeta(path string) (MetaConfig *MetaJSON) {
+	MetaConfig = new(MetaJSON)
+	data, err := ioutil.ReadFile(path)
+	if err != nil {
+		log.Fatalf("Error opening config file: %v", err)
+	}
+	json.Unmarshal(data, &MetaConfig)
+	return MetaConfig
+}
 // fetch the DNS info from our files
 func fetchDNSInfo(queryString string) (fdns_a []string, rdns []string, errors []string) {
 
@@ -41,10 +53,14 @@ func fetchDNSInfo(queryString string) (fdns_a []string, rdns []string, errors []
 
 	return
 }
-
+// homepage handler
+func IndexHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("OK\n"))
+}
 // primary DNS handler
 func DNSHandler(w http.ResponseWriter, r *http.Request) {
-
+	MetaCfg := GetMeta(configJSON)
 	vals := r.URL.Query()
 	queryString, ok := vals["q"]
 	if ok {
@@ -69,8 +85,9 @@ func DNSHandler(w http.ResponseWriter, r *http.Request) {
 		ret.Meta.Runtime = runtimeStr
 		ret.Meta.Errors = errors
 		// TODO -- these really should come in via a config file
-		ret.Meta.FileNames = []string{"2019-01-25-1548417890-fdns_a.json.gz", "2019-01-30-1548868121-rdns.json.gz"}
-		ret.Meta.TOS = "The source of this data is Rapid7 Labs. Please review the Terms of Service: https://opendata.rapid7.com/about/"
+		ret.Meta.Message = MetaCfg.Message
+                ret.Meta.FileNames = MetaCfg.FileNames
+                ret.Meta.TOS = MetaCfg.TOS
 
 		// finally, encode the json!
 		jsonEncoded, err := json.MarshalIndent(ret, "", "\t")
@@ -89,6 +106,8 @@ func DNSHandler(w http.ResponseWriter, r *http.Request) {
 // simple mux server startup
 func main() {
 	r := mux.NewRouter()
+	r.HandleFunc("/",IndexHandler)
 	r.HandleFunc("/dns", DNSHandler)
 	log.Fatal(http.ListenAndServe(":80", r))
 }
+
