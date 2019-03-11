@@ -35,7 +35,10 @@ func GetMeta(path string) (MetaConfig *MetaJSON) {
 	if err != nil {
 		log.Fatalf("Error opening config file: %v", err)
 	}
-	json.Unmarshal(data, &MetaConfig)
+ 	err = json.Unmarshal(data, &MetaConfig)
+	if err != nil {
+		log.Fatalf("Error unmarshalling config file: %v",err)
+	}
 	return MetaConfig
 }
 // fetch the DNS info from our files
