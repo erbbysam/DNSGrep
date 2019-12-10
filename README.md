@@ -65,7 +65,7 @@ go run experimentalServer.go
 You can also run the command line utility using Docker
 ```
 docker build -t dnsgrep .
-docker run --rm -it -v "$PWD"/DNSBinarySearch:/files --name dnsgrep dnsgrep -f /files/test_data.txt -i ".amiccom.com.tw"
+docker run --rm -it -v "$PWD"/DNSBinarySearch:/files dnsgrep -f /files/test_data.txt -i ".amiccom.com.tw"
 ```
 
 # Data Source
