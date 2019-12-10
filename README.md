@@ -60,6 +60,14 @@ Run the experimental server in the same folder as fdns_a.sort & rdns.sort.txt:
 go run experimentalServer.go
 ```
 
+# Docker 
+
+You can also run the command line utility using Docker
+```
+$ docker build -t dnsgrep .
+$ docker run --rm -it -v "$PWD"/scripts:/files --name dnsgrep dnsgrep -f /files/cname.sort.txt -i ".google.com"
+```
+
 # Data Source
 The source of this data referenced throughout this repository is Rapid7 Labs. Please review the Terms of Service:
 https://opendata.rapid7.com/about/
