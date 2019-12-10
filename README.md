@@ -62,7 +62,7 @@ go run experimentalServer.go
 
 # Docker 
 
-You can also run the command line utility using Docker
+You can also run the command line utility using Docker:
 ```
 docker build -t dnsgrep .
 docker run --rm -it -v "$PWD"/DNSBinarySearch:/files dnsgrep -f /files/test_data.txt -i ".amiccom.com.tw"
